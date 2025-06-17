@@ -1,0 +1,17 @@
+# environment 
+.venv
+.env
+
+# cache python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# IDE
+.vscode/
+
+#others
+estrutura.txt
+
+# JSON files are ignored because we use YAML as source of truth, JSON is generated automatically
+*.json

@@ -1,0 +1,39 @@
+tables:
+  nf_header: |
+    CREATE TABLE IF NOT EXISTS nf_header (
+      chave_de_acesso VARCHAR(60) PRIMARY KEY,
+      modelo VARCHAR(5),
+      serie BIGINT,
+      numero BIGINT,
+      natureza_da_operacao VARCHAR(255),
+      data_emissao TIMESTAMP,
+      evento_mais_recente VARCHAR(255),
+      data_hora_evento_mais_recente TIMESTAMP,
+      cpf_cnpj_emitente VARCHAR(14),
+      razao_social_emitente VARCHAR(255),
+      inscricao_estadual_emitente VARCHAR(20),
+      uf_emitente VARCHAR(2),
+      municipio_emitente VARCHAR(100),
+      cnpj_destinatario VARCHAR(14),
+      nome_destinatario VARCHAR(255),
+      uf_destinatario VARCHAR(2),
+      indicador_ie_destinatario VARCHAR(5),
+      destino_da_operacao VARCHAR(5),
+      consumidor_final VARCHAR(5),
+      presenca_do_comprador VARCHAR(5),
+      valor_nota_fiscal NUMERIC(15, 2)
+    );
+
+  nf_itens: |
+    CREATE TABLE IF NOT EXISTS nf_itens (
+      id SERIAL PRIMARY KEY,
+      chave_de_acesso FOREIGN KEY REFERENCES nf_header(chave_de_acesso),
+      descricao VARCHAR(100) NOT NULL,
+      codigo_ncm_sh NOT NULL,
+      tipo_produto VARCHAR(255) NOT NULL,
+      CFOP NOT NULL,
+      quantidade INT,
+      unidade VARCHAR(25)
+      valor_unitario NUMERIC(15, 2)
+      valor_total NUMERIC(15, 2)
+    );

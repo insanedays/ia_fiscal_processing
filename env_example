@@ -1,0 +1,12 @@
+# postgresql connection details
+HOST=
+DATABASE=
+USER=
+PASSWORD=
+PORT=5432
+
+# API keys for various services
+GROQ_API_KEY=your-groq-key
+OPENAI_API_KEY=your-openai-key
+COHERE_API_KEY=your-cohere-key
+ANTHROPIC_API_KEY=your-anthropic-key
