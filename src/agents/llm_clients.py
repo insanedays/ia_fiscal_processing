@@ -1,5 +1,3 @@
-# src/core/llm_client.py
-
 import os
 
 # support for various LLM clients
@@ -8,9 +6,13 @@ from openai import OpenAI
 from cohere import Client as CohereClient
 from anthropic import Anthropic
 
+
 # environment variables to load API keys from a .env file
+# from dotenv import load_dotenv
+
 from dotenv import load_dotenv
 load_dotenv()
+
 
 class LLMClients:
     def __init__(self):
@@ -35,7 +37,7 @@ class LLMClients:
         key = os.getenv("ANTHROPIC_API_KEY")
         return Anthropic(api_key=key) if key else None
 
-    def get_response(self, user_prompt: str, model: str = "mixtral-8x7b-32768", provider: str = "groq") -> str:
+    def get_response(self, user_prompt: str, model: str = "llama3-70b-8192", provider: str = "groq") -> str:
         if provider == "groq" and self.groq:
             response = self.groq.chat.completions.create(
                 model=model,

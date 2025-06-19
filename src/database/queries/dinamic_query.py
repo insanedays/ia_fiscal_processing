@@ -2,77 +2,73 @@ from typing import Dict, List
 from src.database.config.session_db import get_db
 from src.database.config.models_db import NFHeader, NFItens
 
-def advanced_query(payload: Dict) -> List:
+def advanced_query(payload: Dict) -> List[Dict]:
     """
-    Realiza uma consulta dinâmica multi-tabela com filtros e projeção de campos.
-    
-    Espera receber no payload:
-    - filters: dicionário com filtros separados por tabela.
-    - fields: lista de campos (tabela.campo) a serem retornados.
+    Executa uma consulta dinâmica com JOIN entre NFHeader e NFItens,
+    aplicando filtros e projetando apenas os campos especificados.
 
-    Exemplo de payload:
+    Espera um payload com a seguinte estrutura:
+
     payload = {
         "filters": {
             "NFHeader": {
-                "cnpj_destinatario": "12345678901234",
                 "uf_emitente": "SP"
             },
             "NFItens": {
-                "tipo_produto": "Mercadoria",
                 "quantidade": 10
             }
         },
         "fields": [
             "NFHeader.chave_de_acesso",
-            "NFHeader.razao_social_emitente",
-            "NFItens.descricao",
-            "NFItens.valor_unitario",
-            "NFItens.valor_total"
+            "NFHeader.serie",
+            "NFItens.descricao"
         ]
     }
-    """
 
+    Retorna:
+        Uma lista de dicionários, onde cada dicionário representa uma linha da consulta,
+        com os campos nomeados exatamente como especificado no campo "fields" do payload.
+
+    Exemplo de retorno:
+
+    [
+        {
+            "NFHeader.chave_de_acesso": "35240134028316923228550010003691801935917886",
+            "NFHeader.serie": 1,
+            "NFItens.descricao": "Produto XYZ"
+        },
+        ...
+    ]
+    """
     with get_db() as db:
-        # Começa o query fazendo o JOIN entre as tabelas
         query = db.query(NFHeader).join(NFItens)
 
-        # Aplica filtros na tabela NFHeader
-        for attr, value in payload.get("filters", {}).get("NFHeader", {}).items():
-            if hasattr(NFHeader, attr):
-                query = query.filter(getattr(NFHeader, attr) == value)
-            else:
-                raise ValueError(f"Campo inválido em NFHeader: {attr}")
+        # Aplica filtros dinamicamente
+        for table_model, table_filters in payload.get("filters", {}).items():
+            model = {"NFHeader": NFHeader, "NFItens": NFItens}.get(table_model)
+            if not model:
+                raise ValueError(f"Tabela inválida no filtro: {table_model}")
+            for attr, value in table_filters.items():
+                if hasattr(model, attr):
+                    query = query.filter(getattr(model, attr) == value)
+                else:
+                    raise ValueError(f"Campo inválido em {table_model}: {attr}")
 
-        # Aplica filtros na tabela NFItens
-        for attr, value in payload.get("filters", {}).get("NFItens", {}).items():
-            if hasattr(NFItens, attr):
-                query = query.filter(getattr(NFItens, attr) == value)
-            else:
-                raise ValueError(f"Campo inválido em NFItens: {attr}")
+        # Projeta os campos solicitados
+        field_objs = []
+        col_names = []
 
-        # Define a projeção (campos a serem retornados)
-        fields = []
-        for field in payload.get("fields", []):
-            # Divide o campo no formato Tabela.Campo
-            table_name, column_name = field.split(".")
-            # Mapeia o nome da tabela para o Model ORM correto
-            table = {
-                "NFHeader": NFHeader,
-                "NFItens": NFItens
-            }.get(table_name)
+        for full_field in payload.get("fields", []):
+            table_name, column_name = full_field.split(".")
+            model = {"NFHeader": NFHeader, "NFItens": NFItens}.get(table_name)
+            if not model or not hasattr(model, column_name):
+                raise ValueError(f"Campo inválido: {full_field}")
+            field_objs.append(getattr(model, column_name))
+            col_names.append(full_field)  # usa como chave no dict final
 
-            if not table:
-                raise ValueError(f"Tabela inválida: {table_name}")
-
-            # Adiciona o campo correspondente ao query
-            if hasattr(table, column_name):
-                fields.append(getattr(table, column_name))
-            else:
-                raise ValueError(f"Campo inválido em {table_name}: {column_name}")
-
-        # Substitui a query pela projeção dos campos solicitados
-        query = query.with_entities(*fields)
-
-        # Executa e retorna o resultado (lista de tuplas)
+        query = query.with_entities(*field_objs)
         result = query.all()
-        return result
+
+        # Constrói lista de dicionários (coluna: valor)
+        return [dict(zip(col_names, row)) for row in result]
+

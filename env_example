@@ -11,6 +11,4 @@ OPENAI_API_KEY=your-openai-key
 COHERE_API_KEY=your-cohere-key
 ANTHROPIC_API_KEY=your-anthropic-key
 
-
-INTERFACE_MODE=streamlit # Options: streamlit, api
-CATALOG_PATH=src/database/catalog.yaml # Path to the bd catalog file
+INTERFACE_MODE=streamlit # Options: streamlit ou api

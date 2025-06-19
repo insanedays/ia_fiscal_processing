@@ -34,23 +34,18 @@ analyze_intent:
     Formatos esperados:
 
     Caso a intenção seja válida:
-    {
+    {{
       "intencao": "consulta_estrutura_dados"
-    }
+    }}
 
     Caso a intenção esteja fora do escopo:
-    {
+    {{
       "intencao": "fora_de_escopo",
       "orientacao": "Sua pergunta não parece estar relacionada aos dados estruturados das notas fiscais. Tente reformular pedindo, por exemplo, notas por CNPJ, data ou valor."
-    }
+    }}
 
     Pergunta do usuário:
-    """
     {input_do_usuario}
-    """
-
-    """
-
 
 generate_payload:
   description: "Transforma uma pergunta do usuário em um payload de consulta estruturada para o banco."
@@ -59,88 +54,81 @@ generate_payload:
 
     Formato de saída obrigatório (nunca explique, apenas gere o JSON puro):
 
-    {
-        "filters": {
-            "NFHeader": {
-                "campo1": "valor1",
-                ...
-            },
-            "NFItens": {
-                "campo2": "valor2",
-                ...
-            }
-        },
-        "fields": [
-            "NFHeader.campoX",
-            "NFItens.campoY",
-            ...
-        ]
-    }
+    {{
+      "filters": {{
+          "NFHeader": {{
+              "campo1": "valor1",
+              ...
+          }},
+          "NFItens": {{
+              "campo2": "valor2",
+              ...
+          }}
+      }},
+      "fields": [
+          "NFHeader.campoX",
+          "NFItens.campoY",
+          ...
+      ]
+    }}
 
     Regras:
-
     - Use sempre os campos válidos conforme o catálogo fornecido.
     - Separe corretamente os filtros por tabela.
     - Se o usuário não indicar filtros, apenas monte os fields.
     - Nunca gere campos inexistentes ou criados por suposição.
     - Não gere nenhum texto além do JSON.
+    - Não escreva títulos, introduções, nem observações.
+    - Apenas retorne o JSON puro, sem comentários ou explicações.
 
     Catálogo de dados:
-
     {catalogo_de_dados_injetado_pelo_rag}
 
     Pergunta do usuário:
-    """
     {input_do_usuario}
-    """
-
 
 validate_payload:
-  description: "Valida e corrige um payload gerado, garantindo que todos os campos e tabelas existem no catálogo."
+  description: "Verifica se um payload JSON é válido de acordo com o catálogo de dados fornecido."
   prompt: |
-    Você irá receber um payload de consulta no formato JSON. Valide se:
+    Sua tarefa é analisar o payload JSON a seguir e responder apenas com seu status de validade.
 
+    Verifique:
     - Todas as tabelas existem no catálogo.
-    - Todos os campos são válidos para as respectivas tabelas.
-    - Ajuste eventuais campos com erro de digitação (typos simples).
-    - Remova qualquer campo inexistente.
-    - Retorne sempre o JSON validado e limpo. Não gere nenhum texto explicativo.
+    - Todos os campos são válidos para suas respectivas tabelas.
+    - Não há campos com erro de digitação ou inexistentes.
 
-    Catálogo de dados disponível:
+    Regras obrigatórias:
+    - Responda apenas com: {{"status": "valid"}} ou {{"status": "invalid"}}
+    - Não adicione nenhum texto, comentário, explicação ou formatação adicional.
+    - A resposta deve ser estritamente um JSON contendo apenas o campo "status".
 
+    Catálogo de dados:
     {catalogo_de_dados_injetado_pelo_rag}
 
     Payload recebido:
-    """
     {payload_gerado}
-    """
 
+# rewrite_response:
+#   description: "Formata a resposta do banco de forma resumida e amigável para o usuário."
+#   prompt: |
+#     Você receberá:
+#     - A pergunta original do usuário.
+#     - O resultado bruto da consulta SQL (normalmente uma lista de linhas e colunas).
 
-rewrite_response:
-  description: "Formata a resposta do banco de forma resumida e amigável para o usuário."
-  prompt: |
-rewrite_response:
-  description: "Formata a resposta do banco de forma resumida e amigável para o usuário."
-  prompt: |
-    Você receberá:
-    - A pergunta original do usuário.
-    - O resultado bruto da consulta SQL (normalmente uma lista de linhas e colunas).
+#     Sua tarefa é:
 
-    Sua tarefa é:
+#     - Gerar uma resposta textual resumida e fácil de entender.
+#     - Basear a resposta tanto no resultado SQL quanto na intenção da pergunta.
+#     - Caso o resultado contenha muitos registros, forneça um resumo geral.
+#     - Nunca invente dados, sempre respeite o conteúdo recebido.
+#     - Mantenha o foco objetivo: os dados fiscais solicitados.
+#     - Evite jargões técnicos, use uma linguagem simples e direta.
+#     - Se a consulta não retornar resultados, informe que não há dados correspondentes.
+#     - Se a consulta retornar muitos registros, resuma os dados mais relevantes.
 
-    - Gerar uma resposta textual resumida e fácil de entender.
-    - Basear a resposta tanto no resultado SQL quanto na intenção da pergunta.
-    - Caso o resultado contenha muitos registros, forneça um resumo geral.
-    - Nunca invente dados, sempre respeite o conteúdo recebido.
-    - Mantenha o foco objetivo: os dados fiscais solicitados.
+#     Pergunta do usuário:
+#     {input_do_usuario}
 
-    Pergunta do usuário:
-    """
-    {input_do_usuario}
-    """
-
-    Resultado da consulta:
-    """
-    {resultado_sql}
-    """
+#     Resultado da consulta:
+#     {resultado_sql}
 

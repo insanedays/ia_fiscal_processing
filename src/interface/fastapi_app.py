@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from src.agents.run_graph import run_graph
-from utilis.load_db_catalog import load_catalog
+from src.utilis.load_db_catalog import load_catalog
 
 load_dotenv()
 

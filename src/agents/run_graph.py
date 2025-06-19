@@ -1,5 +1,3 @@
-# src/core/run_graph.py
-
 from src.agents.graph import graph_executor
 from src.agents.graph import AgentState
 
@@ -21,4 +19,6 @@ def run_graph(question: str, catalog: str) -> str:
     )
 
     final_state = graph_executor.invoke(state_input)
-    return final_state.get("final_answer", "Erro: nenhuma resposta gerada.")
+    return final_state.get("query_result", "Erro: nenhuma resposta gerada.")
+
+

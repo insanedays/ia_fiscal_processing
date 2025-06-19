@@ -3,9 +3,6 @@ from sqlalchemy import (
     Integer,
     String,
     Float,
-    # Date,
-    # Boolean,
-    # Text,
     ForeignKey,
     TIMESTAMP,
     Numeric,
@@ -14,7 +11,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship,declarative_base
 
 Base = declarative_base()
-
 
 class NFHeader(Base):
     __tablename__ = "nf_header"
@@ -45,7 +41,6 @@ class NFHeader(Base):
 
     def __repr__(self):
         return f"<NFHeader(chave_de_acesso='{self.chave_de_acesso}', numero={self.numero})>"
-
 
 class NFItens(Base):
     __tablename__ = "nf_itens"

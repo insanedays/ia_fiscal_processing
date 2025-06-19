@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+
 # ===  Adds the project ROOT to sys.path to allow absolute imports ===
 CURRENT_FILE = Path(__file__).resolve()
 ROOT = CURRENT_FILE.parents[3] 
@@ -11,16 +12,11 @@ from src.database.config.populate_db import insert_parquet_to_table
 from src.database.config.models_db import NFItens, NFHeader
 
 # Database initialization
-def init_db():
-    
-    with get_db() as db:
-        Base.metadata.create_all(db.bind)
+with get_db() as db:
+    Base.metadata.create_all(db.bind)
 
-        insert_parquet_to_table("data/silver/nf_itens.parquet", NFItens, db)
-        insert_parquet_to_table("data/silver/nf_header.parquet", NFHeader, db) 
+    insert_parquet_to_table("data/silver/nf_itens.parquet", NFItens, db)
+    insert_parquet_to_table("data/silver/nf_header.parquet", NFHeader, db) 
 
-        db.commit()
-        return  "[INFO] Banco de dados inicializado e populado com sucesso."
-
-if __name__ == "__main__":
-    init_db()
+    db.commit()
+    print( "[INFO] Banco de dados inicializado e populado com sucesso.")

@@ -1,12 +1,18 @@
 # Projeto: Chatbot Fiscal Inteligente com LLM + LangGraph
 
-Este projeto implementa um sistema de atendimento automatizado que responde a perguntas em linguagem natural sobre dados fiscais (ex: notas fiscais eletrônicas), utilizando modelos de linguagem (LLMs), orquestração via LangGraph, execução de queries SQL dinâmicas em PostgreSQL e interface via Streamlit ou FastAPI (para WhatsApp).
+Este projeto implementa um agente conversacional capaz de realizar consultas de notas fiscais em um banco de dadados, ele interpretar perguntas em linguagem natural e realiza consultas no banco, retornando o resultado. A arquitetura combina:
 
----
+- Modelos de linguagem (LLMs) para interpretação e geração de instruções SQL
+- Orquestração modular com LangGraph, permitindo controle explícito do fluxo de raciocínio
+- Execução dinâmica de queries SQL em banco PostgreSQL
+- Validação semântica de payloads JSON baseados em um catálogo YAML
+- Interface adaptável via Streamlit ou FastAPI, com integração planejada para WhatsApp via WAHA
+- Modularização completa e reaproveitável para outros domínios além do fiscal
+- Compatibilidade com múltiplos provedores de LLMs, via abstração por client único
+- Flexibilidade de execução via interface gráfica (Streamlit) ou API REST (FastAPI)
 
 ## Objetivo
-
-Permitir que usuários consultem uma base de dados fiscal usando linguagem natural, sem conhecer SQL ou estrutura da base. O sistema interpreta a pergunta, gera uma consulta estruturada, executa no banco e retorna a resposta formatada.
+Permitir que qualquer usuário, mesmo sem conhecimento técnico, consulte informações fiscais complexas utilizando linguagem natural. O sistema identifica a intenção da pergunta, gera e valida um payload estruturado com base em um catálogo de dados, executa a consulta SQL correspondente e reescreve a resposta em linguagem acessível. Também permite retorno ao início do raciocínio em caso de erro, garantindo robustez e confiança no fluxo.
 
 ---
 
@@ -17,7 +23,7 @@ Permitir que usuários consultem uma base de dados fiscal usando linguagem natur
 | Python 3.10+          | Linguagem principal                          | Amplo suporte para IA, SQL, APIs             |
 | Groq API              | LLM (ex: Mixtral, LLaMA 3)                   | Alta velocidade e custo reduzido             |
 | LangChain + LangGraph | Orquestração dos agentes e controle de fluxo | Controle condicional, ciclos, escalabilidade |
-| PostgreSQL            | Banco de dados fiscal                        | Robusto, compatível com SQL dinâmico         |
+| PostgreSQL + AWS RDS           | Banco de dados fiscal em nuvem                       | Robusto, compatível com SQL dinâmico         |
 | Streamlit             | Interface local para testes                  | Rápido, simples, sem backend                 |
 | FastAPI               | Backend REST para integração com WhatsApp    | Desempenho, suporte a webhooks               |
 | YAML                  | Armazenamento dos prompts e catálogo         | Leitura humana, fácil edição                 |
@@ -47,14 +53,14 @@ Resposta final para o usuário
 
 ### Agentes LLM
 
-* **`analyze_intent`**: Classifica a intenção da pergunta e determina se é processável
-* **`generate_payload`**: Gera um JSON com filtros e campos conforme o catálogo
-* **`validate_payload`**: Verifica se o payload é consistente com o catálogo
-* **`rewrite_response`**: Formata a resposta do banco em linguagem amigável
+- **`analyze_intent`**: Classifica a intenção da pergunta e determina se é processável
+- **`generate_payload`**: Gera um JSON com filtros e campos conforme o catálogo
+- **`validate_payload`**: Verifica se o payload é consistente com o catálogo e opcionalmente o corrige
+- **`rewrite_response`**: Formata a resposta do banco em linguagem amigável
 
 ### Catálogo de Dados
 
-O sistema usa um catálogo YAML com todas as tabelas e campos disponíveis para consulta. Esse catálogo é injetado nos prompts para orientar a geração e validação dos payloads. A leitura do catálogo é feita dinamicamente por meio do utilitário `utils.load_db_catalog` que busca o caminho via variável de ambiente `CATALOG_PATH`.
+O sistema usa um catálogo YAML com todas as tabelas e campos disponíveis para consulta. Esse catálogo é injetado nos prompts para orientar a geração e validação dos payloads. A leitura do catálogo é feita dinamicamente por meio do utilitário `utils.load_db_catalog` 
 
 ### LangGraph com Ciclos
 
@@ -117,9 +123,9 @@ A orquestração do fluxo de agentes é feita com `StateGraph` e `TypedState`. O
 
 ## Interfaces
 
-* **Streamlit (`streamlit_app.py`)**: Interface local para testes com campo de entrada e resposta direta.
-* **FastAPI (`fastapi_app.py`)**: API REST para produção, com rota `/ask` recebendo pergunta e retornando resposta. Integrável com WhatsApp via WAHA ou Twilio.
-* **start.py**: Roteador principal controlado via `INTERFACE_MODE` no `.env`
+- **Streamlit (`streamlit_app.py`)**: Interface local para testes com campo de entrada e resposta direta.
+- **FastAPI (`fastapi_app.py`)**: API REST para produção, com rota `/ask` recebendo pergunta e retornando resposta. Integrável com WhatsApp via WAHA ou Twilio.
+- **start.py**: Roteador principal controlado via `INTERFACE_MODE` no `.env`
 
 ---
 
@@ -163,20 +169,18 @@ Execução:
 
 ```bash
 # Interface local com Streamlit
-python src/start.py
+Streamlit run start.py
 
 # API REST com FastAPI
-INTERFACE_MODE=api python src/start.py
+INTERFACE_MODE=api python start.py
 ```
 
 Inicialização do banco:
 
 ```bash
-# Criação das tabelas
-python src/database/config/init_db.py
+# Criação das tabelas e popolação dos dados
+python main.py
 
-# População com dados de exemplo
-python src/database/config/populate_db.py
 ```
 
 ---
@@ -212,12 +216,15 @@ Resposta esperada:
 * [x] FastAPI com webhook funcional
 * [ ] Integração com WhatsApp (WAHA)
 * [ ] Testes unitários e de fluxo
+* [ ] Fallback com SQLDatabaseToolkit para perguntas fora do catálogo
 
 ---
 
 ## Licença
 
-Este projeto é de uso privado enquanto estiver em fase de desenvolvimento.
+Este projeto foi desenvolvido com fins educacionais e de pesquisa. O código é de uso pessoal e está **proibida sua utilização comercial ou revenda sem autorização explícita da autora**.
+
+**Se você utilizar este projeto como base ou inspiração, por favor inclua um link para este repositório.**
 
 ---
 
@@ -226,12 +233,5 @@ Este projeto é de uso privado enquanto estiver em fase de desenvolvimento.
 Os arquivos em `data/raw/` são dados sintéticos para testes e demonstrações:
 
 - `202401_NFs_Cabecalho.csv`
-- `202401_NFs_Itens.csv`
+- `202401_NFs_Itens.csv`.
 
-Esses dados não contêm informações reais ou sensíveis.
-
----
-
-## Dados JSON
-
-Os arquivos `.json` não são versionados porque são gerados automaticamente a partir dos arquivos `.yaml`. O repositório considera os `.yaml` como fonte de verdade.
