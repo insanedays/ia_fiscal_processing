@@ -1,3 +1,57 @@
+analyze_intent:
+  description: "Classifica a intenção da pergunta do usuário com base no escopo de dados estruturados de notas fiscais."
+  prompt: |
+    Sua tarefa é analisar a intenção da pergunta do usuário e classificá-la conforme o escopo do sistema fiscal.
+
+    Existem dois tipos de intenção possíveis:
+
+    1. "consulta_estrutura_dados":
+        - A pergunta pode ser respondida com base nos dados estruturados disponíveis sobre notas fiscais.
+        - Exemplos:
+          - "Quais notas fiscais foram emitidas em janeiro de 2023?"
+          - "Qual o valor total das notas fiscais emitidas no mês passado?"
+          - "Me mostre as notas com produtos do tipo fertilizante"
+          - "Quais notas fiscais foram emitidas com o produto X?"
+          - "Quais notas fiscais foram emitidas com o CNPJ 123456780001
+
+    2. "fora_de_escopo":
+        - A pergunta não está relacionada aos dados estruturados consultáveis diretamente no banco.
+        - Exemplos:
+          - "Como posso pagar menos imposto?"
+          - "Cadastre uma nova nota para mim"
+          - "Minha empresa pode ser autuada por isso?"
+          - "Quais são as regras para emissão de notas fiscais?"
+          - "Como funciona a legislação tributária?"
+
+      Dica: Uma consulta válida geralmente envolve dados factuais e estruturados — como valores, datas, códigos, CNPJs — que podem ser buscados diretamente em tabelas relacionais.
+
+    Regras:
+    - Retorne apenas um JSON com a classificação da intenção.
+    - Se for "fora_de_escopo", inclua uma orientação curta e simpática sugerindo como reformular.
+    - Não gere payloads ou explicações técnicas.
+    - Nunca invente informações.
+
+    Formatos esperados:
+
+    Caso a intenção seja válida:
+    {
+      "intencao": "consulta_estrutura_dados"
+    }
+
+    Caso a intenção esteja fora do escopo:
+    {
+      "intencao": "fora_de_escopo",
+      "orientacao": "Sua pergunta não parece estar relacionada aos dados estruturados das notas fiscais. Tente reformular pedindo, por exemplo, notas por CNPJ, data ou valor."
+    }
+
+    Pergunta do usuário:
+    """
+    {input_do_usuario}
+    """
+
+    """
+
+
 generate_payload:
   description: "Transforma uma pergunta do usuário em um payload de consulta estruturada para o banco."
   prompt: |

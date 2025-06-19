@@ -10,3 +10,7 @@ GROQ_API_KEY=your-groq-key
 OPENAI_API_KEY=your-openai-key
 COHERE_API_KEY=your-cohere-key
 ANTHROPIC_API_KEY=your-anthropic-key
+
+
+INTERFACE_MODE=streamlit # Options: streamlit, api
+CATALOG_PATH=src/database/catalog.yaml # Path to the bd catalog file

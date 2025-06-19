@@ -71,7 +71,7 @@ def advanced_query(payload: Dict) -> List:
                 raise ValueError(f"Campo inválido em {table_name}: {column_name}")
 
         # Substitui a query pela projeção dos campos solicitados
-        query = db.query(*fields)
+        query = query.with_entities(*fields)
 
         # Executa e retorna o resultado (lista de tuplas)
         result = query.all()
