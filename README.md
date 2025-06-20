@@ -68,7 +68,7 @@ A orquestração do fluxo de agentes é feita com `StateGraph` e `TypedState`. O
 
 ---
 
-## Estrutura de Diretórios
+## Estrutura de pastas
 
 ```plaintext
 ├── .env
@@ -76,47 +76,22 @@ A orquestração do fluxo de agentes é feita com `StateGraph` e `TypedState`. O
 ├── README.md
 ├── data
 │   ├── raw
-│   │   ├── 202401_NFs_Cabecalho.csv
-│   │   └── 202401_NFs_Itens.csv
 │   └── silver
-│       ├── nf_header.parquet
-│       └── nf_itens.parquet
 ├── docs
-│   └── melhorias_database.md
 ├── env_example
 ├── main.py
 ├── notebook
-│   └── normalize.ipynb
 ├── repo.py
 ├── requirements.txt
 ├── src
 │   ├── agents
-│   │   ├── graph.py
-│   │   ├── llm_clients.py
-│   │   ├── payload.yaml
-│   │   ├── prompt_loader.py
-│   │   ├── query_runner.py
-│   │   └── run_graph.py
 │   ├── database
 │   │   ├── catalog.yaml
 │   │   ├── config
-│   │   │   ├── create_tables.yaml
-│   │   │   ├── init_db.py
-│   │   │   ├── models_db.py
-│   │   │   ├── populate_db.py
-│   │   │   ├── reset_db.py
-│   │   │   └── session_db.py
 │   │   ├── crud
-│   │   │   ├── nf_header.py
-│   │   │   └── nf_itens.py
 │   │   └── queries
-│   │       └── dinamic_query.py
 │   ├── interface
-│   │   ├── fastapi_app.py
-│   │   └── streamlit_app.py
 │   └── utilis
-│       ├── load_db_catalog.py
-│       └── normalize_db.py
 ```
 
 ---
