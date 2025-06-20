@@ -81,7 +81,6 @@ A orquestração do fluxo de agentes é feita com `StateGraph` e `TypedState`. O
 ├── env_example
 ├── main.py
 ├── notebook
-├── repo.py
 ├── requirements.txt
 ├── src
 │   ├── agents
