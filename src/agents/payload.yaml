@@ -54,38 +54,96 @@ generate_payload:
 
     Formato de saída obrigatório (nunca explique, apenas gere o JSON puro):
 
+    Caso **não haja agregação**:
+
     {{
       "filters": {{
           "NFHeader": {{
-              "campo1": "valor1",
-              ...
+              "campo1": "valor1"
           }},
           "NFItens": {{
-              "campo2": "valor2",
-              ...
+              "campo2": "valor2"
           }}
       }},
       "fields": [
           "NFHeader.campoX",
-          "NFItens.campoY",
-          ...
+          "NFItens.campoY"
       ]
+    }}
+
+    Caso **haja agregação**:
+    {{
+      "filters": {{
+          "NFHeader": {{}},
+          "NFItens": {{}}
+      }},
+      "fields": [],
+      "aggregation": {{
+          "operation": "sum",
+          "target_field": "NFItens.valor_total",
+          "group_by": "NFHeader.cnpj_emitente"
+      }}
     }}
 
     Regras:
     - Use sempre os campos válidos conforme o catálogo fornecido.
     - Separe corretamente os filtros por tabela.
-    - Se o usuário não indicar filtros, apenas monte os fields.
-    - Nunca gere campos inexistentes ou criados por suposição.
-    - Não gere nenhum texto além do JSON.
-    - Não escreva títulos, introduções, nem observações.
-    - Apenas retorne o JSON puro, sem comentários ou explicações.
+    - Nunca gere campos inexistentes ou inventados por suposição.
+    - Se o usuário pedir "total", "soma", "média", "quantidade", "número de...", "agrupado por...", "por CNPJ", "por estado", etc., considere como intenção de agregação.
+    - Se o usuário indicar apenas o mês (ex: "janeiro de 2024"), gere o filtro de data com:
+      "data_emissao": {{
+        "between": ["2024-01-01", "2024-01-31"]
+      }}
+    - O campo "group_by" só deve ser incluído se o usuário pedir divisão por categoria, CNPJ, produto, estado etc.
+    - Sempre retorne apenas o JSON puro, sem nenhum comentário, explicação ou texto adicional.
 
-    Catálogo de dados:
+      Exemplos de perguntas e payloads esperados:
+
+    1. Pergunta:
+    "Qual o valor total das notas fiscais emitidas em janeiro de 2024 por UF do emitente?"
+
+    Resposta esperada:
+    {{
+      "filters": {{
+        "NFHeader": {{
+          "data_emissao": {{
+            "between": ["2024-01-01", "2024-01-31"]
+          }}
+        }},
+        "NFItens": {{}}
+      }},
+      "fields": [],
+      "aggregation": {{
+        "operation": "sum",
+        "target_field": "NFHeader.valor_nota_fiscal",
+        "group_by": "NFHeader.uf_emitente"
+      }}
+    }}
+
+    2. Pergunta:
+    "Quantas notas foram emitidas com o produto 'fertilizante'?"
+
+    Resposta esperada:
+    {{
+      "filters": {{
+        "NFHeader": {{}},
+        "NFItens": {{
+          "descricao": "fertilizante"
+        }}
+      }},
+      "fields": [],
+      "aggregation": {{
+        "operation": "count",
+        "target_field": "NFHeader.numero"
+      }}
+    }}
+
+    Catálogo de dados fornecido:
     {catalogo_de_dados_injetado_pelo_rag}
 
     Pergunta do usuário:
     {input_do_usuario}
+
 
 validate_payload:
   description: "Verifica se um payload JSON é válido de acordo com o catálogo de dados fornecido."
